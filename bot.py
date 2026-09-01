@@ -15,8 +15,7 @@ async def tasks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 
-def main():
-    token = os.getenv("BOT_TOKEN")
+
 
     if not token:
         print("BOT_TOKEN is not set!")
