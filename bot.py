@@ -1,6 +1,9 @@
 import os
-from telegram import Update
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
+
+
+CHANNEL_USERNAME = "@TaskStarRewards"
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -10,8 +13,20 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def tasks(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    keyboard = [
+        [
+            InlineKeyboardButton(
+                "📢 Join TaskStar Rewards Channel",
+                url="https://t.me/TaskStarRewards"
+            )
+        ]
+    ]
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
     await update.message.reply_text(
-        "🎯 Available tasks will appear here soon."
+        "🎯 Task #1\n\n📢 Join our TaskStar Rewards channel.",
+        reply_markup=reply_markup
     )
 
 
