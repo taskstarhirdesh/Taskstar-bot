@@ -35,7 +35,7 @@ cred = credentials.Certificate(firebase_data)
 firebase_admin.initialize_app(
     cred,
     {
-        "databaseURL": "YOUR_FIREBASE_DATABASE_URL"
+        "databaseURL": https://taskstar-b6d2e-default-rtdb.asia-southeast1.firebasedatabase.app/
     }
 )
 
