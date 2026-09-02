@@ -23,7 +23,10 @@ from telegram.ext import (
 
 
 CHANNEL_USERNAME = "@TaskStarRewards"
+
 VIDEO_PRICE = 250
+
+VIDEO_FILE_ID = "BAACAgUAAxkBAAMlapf-BcbusYh4WJ4WpzWWxqKy1mIAAjYfAAIcpcBUk1_2aRKHA8E9BA"
 
 
 # ---------------- FIREBASE ----------------
@@ -59,9 +62,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
 
     await update.message.reply_text(
-        "Welcome to TaskStar!\n\n"
+        "⭐ Welcome to TaskStar!\n\n"
         "Use /tasks to view available tasks.\n\n"
-        "Unlock the video for 250 Telegram Stars.",
+        "🎬 Unlock the video for 250 Telegram Stars.",
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
@@ -216,7 +219,9 @@ async def successful_payment(
 ):
 
     payment = update.message.successful_payment
+
     user_id = str(update.effective_user.id)
+
 
     if (
         payment.currency == "XTR"
@@ -229,9 +234,16 @@ async def successful_payment(
 
         purchase_ref.set(True)
 
+
         await update.message.reply_text(
             "🎉 Payment Successful!\n\n"
-            "✅ Your video has been unlocked."
+            "🎬 Your video is ready!"
+        )
+
+
+        await update.message.reply_video(
+            video=VIDEO_FILE_ID,
+            caption="🎬 Your unlocked video"
         )
 
 
@@ -258,7 +270,9 @@ def main():
     if not token:
 
         print("BOT_TOKEN is not set!")
+
         return
+
 
     app = ApplicationBuilder().token(token).build()
 
@@ -291,10 +305,12 @@ def main():
     )
 
 
-    # TELEGRAM STARS
+    # TELEGRAM STARS PAYMENT
 
     app.add_handler(
-        PreCheckoutQueryHandler(pre_checkout)
+        PreCheckoutQueryHandler(
+            pre_checkout
+        )
     )
 
     app.add_handler(
