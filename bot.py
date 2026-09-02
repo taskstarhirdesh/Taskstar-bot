@@ -1,9 +1,11 @@
 import os
+
 from telegram import (
     Update,
     InlineKeyboardButton,
     InlineKeyboardMarkup
 )
+
 from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
@@ -51,13 +53,38 @@ async def tasks(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def check_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     query = update.callback_query
+    user_id = query.from_user.id
 
     await query.answer()
 
-    await query.message.reply_text(
-        "⏳ Checking your task...\n\n"
-        "Task verification will be added next."
-    )
+    try:
+        member = await context.bot.get_chat_member(
+            chat_id=CHANNEL_USERNAME,
+            user_id=user_id
+        )
+
+        if member.status in [
+            "member",
+            "administrator",
+            "creator"
+        ]:
+
+            await query.message.reply_text(
+                "🎉 Task Completed!\n\n"
+                "You successfully joined the TaskStar Rewards channel. ✅"
+            )
+
+        else:
+
+            await query.message.reply_text(
+                "❌ Please join the channel first."
+            )
+
+    except Exception:
+
+        await query.message.reply_text(
+            "❌ Please join the channel first."
+        )
 
 
 def main():
@@ -70,9 +97,13 @@ def main():
 
     app = ApplicationBuilder().token(token).build()
 
-    app.add_handler(CommandHandler("start", start))
+    app.add_handler(
+        CommandHandler("start", start)
+    )
 
-    app.add_handler(CommandHandler("tasks", tasks))
+    app.add_handler(
+        CommandHandler("tasks", tasks)
+    )
 
     app.add_handler(
         CallbackQueryHandler(
