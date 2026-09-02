@@ -3,7 +3,14 @@ import json
 import firebase_admin
 
 from firebase_admin import credentials, db
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, LabeledPrice
+
+from telegram import (
+    Update,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    LabeledPrice
+)
+
 from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
@@ -14,11 +21,12 @@ from telegram.ext import (
     filters
 )
 
+
 CHANNEL_USERNAME = "@TaskStarRewards"
 VIDEO_PRICE = 250
 
 
-# FIREBASE
+# ---------------- FIREBASE ----------------
 
 firebase_json = os.getenv("FIREBASE_SERVICE_ACCOUNT")
 
@@ -37,7 +45,7 @@ firebase_admin.initialize_app(
 )
 
 
-# START
+# ---------------- START ----------------
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
@@ -58,34 +66,34 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 
-# TASKS
+# ---------------- TASKS ----------------
 
 async def tasks(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     keyboard = [
         [
             InlineKeyboardButton(
-                "Join TaskStar Rewards Channel",
+                "📢 Join TaskStar Rewards Channel",
                 url="https://t.me/TaskStarRewards"
             )
         ],
         [
             InlineKeyboardButton(
-                "Check Task",
+                "✅ Check Task",
                 callback_data="check_task_1"
             )
         ]
     ]
 
     await update.message.reply_text(
-        "Task #1\n\n"
-        "Join our TaskStar Rewards channel.\n\n"
+        "🎯 Task #1\n\n"
+        "📢 Join our TaskStar Rewards channel.\n\n"
         "After joining, click Check Task.",
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
 
-# CHECK TASK
+# ---------------- CHECK TASK ----------------
 
 async def check_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
@@ -101,7 +109,7 @@ async def check_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if task_ref.get():
 
         await query.message.reply_text(
-            "You already completed this task."
+            "⚠️ You already completed this task."
         )
 
         return
@@ -122,14 +130,14 @@ async def check_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
             task_ref.set(True)
 
             await query.message.reply_text(
-                "Task Completed!\n\n"
-                "Your completion has been saved."
+                "🎉 Task Completed!\n\n"
+                "Your completion has been saved. ✅"
             )
 
         else:
 
             await query.message.reply_text(
-                "Please join the channel first."
+                "❌ Please join the channel first."
             )
 
     except Exception as e:
@@ -137,11 +145,11 @@ async def check_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
         print(e)
 
         await query.message.reply_text(
-            "Please join the channel first."
+            "❌ Please join the channel first."
         )
 
 
-# BUY VIDEO
+# ---------------- BUY VIDEO ----------------
 
 async def buy_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
@@ -157,7 +165,7 @@ async def buy_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if purchase_ref.get():
 
         await query.message.reply_text(
-            "You already unlocked this video!"
+            "✅ You already unlocked this video!"
         )
 
         return
@@ -179,7 +187,7 @@ async def buy_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 
-# PRE CHECKOUT
+# ---------------- PRE CHECKOUT ----------------
 
 async def pre_checkout(
     update: Update,
@@ -200,7 +208,7 @@ async def pre_checkout(
         )
 
 
-# SUCCESSFUL PAYMENT
+# ---------------- SUCCESSFUL PAYMENT ----------------
 
 async def successful_payment(
     update: Update,
@@ -222,12 +230,26 @@ async def successful_payment(
         purchase_ref.set(True)
 
         await update.message.reply_text(
-            "Payment Successful!\n\n"
-            "Your video has been unlocked."
+            "🎉 Payment Successful!\n\n"
+            "✅ Your video has been unlocked."
         )
 
 
-# MAIN
+# ---------------- GET VIDEO FILE ID ----------------
+
+async def get_video_id(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE
+):
+
+    video_id = update.message.video.file_id
+
+    await update.message.reply_text(
+        f"VIDEO_FILE_ID:\n\n{video_id}"
+    )
+
+
+# ---------------- MAIN ----------------
 
 def main():
 
@@ -240,9 +262,19 @@ def main():
 
     app = ApplicationBuilder().token(token).build()
 
-    app.add_handler(CommandHandler("start", start))
 
-    app.add_handler(CommandHandler("tasks", tasks))
+    # COMMANDS
+
+    app.add_handler(
+        CommandHandler("start", start)
+    )
+
+    app.add_handler(
+        CommandHandler("tasks", tasks)
+    )
+
+
+    # BUTTONS
 
     app.add_handler(
         CallbackQueryHandler(
@@ -258,6 +290,9 @@ def main():
         )
     )
 
+
+    # TELEGRAM STARS
+
     app.add_handler(
         PreCheckoutQueryHandler(pre_checkout)
     )
@@ -268,6 +303,17 @@ def main():
             successful_payment
         )
     )
+
+
+    # GET VIDEO FILE ID
+
+    app.add_handler(
+        MessageHandler(
+            filters.VIDEO,
+            get_video_id
+        )
+    )
+
 
     print("TaskStar Bot is running...")
 
